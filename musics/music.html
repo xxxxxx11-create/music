@@ -1301,14 +1301,18 @@
         dualAudioA.load(); dualAudioB.load();
         setupDualAudioEvents();
         updateDualPlayIcon();
+        // 为双重进度条绑定拖动事件
+        bindDualProgressBars();
       }
 
       function setupDualAudioEvents() {
         dualAudioA.onloadedmetadata = () => {
-          document.getElementById('dual-time-a-duration').textContent = formatTime(dualAudioA.duration);
+          const durEl = document.getElementById('dual-time-a-duration');
+          if (durEl) durEl.textContent = formatTime(dualAudioA.duration);
         };
         dualAudioB.onloadedmetadata = () => {
-          document.getElementById('dual-time-b-duration').textContent = formatTime(dualAudioB.duration);
+          const durEl = document.getElementById('dual-time-b-duration');
+          if (durEl) durEl.textContent = formatTime(dualAudioB.duration);
         };
         dualAudioA.ontimeupdate = () => {
           if (dualAudioA.duration) {
@@ -1328,6 +1332,29 @@
             if (time) time.textContent = formatTime(dualAudioB.currentTime);
           }
         };
+      }
+
+      function bindDualProgressBars() {
+        const barA = document.getElementById('dual-bar-a');
+        const barB = document.getElementById('dual-bar-b');
+        if (barA) {
+          barA.addEventListener('click', (e) => {
+            const rect = barA.getBoundingClientRect();
+            const percent = ((e.clientX - rect.left) / rect.width) * 100;
+            if (dualAudioA.duration) {
+              dualAudioA.currentTime = (percent / 100) * dualAudioA.duration;
+            }
+          });
+        }
+        if (barB) {
+          barB.addEventListener('click', (e) => {
+            const rect = barB.getBoundingClientRect();
+            const percent = ((e.clientX - rect.left) / rect.width) * 100;
+            if (dualAudioB.duration) {
+              dualAudioB.currentTime = (percent / 100) * dualAudioB.duration;
+            }
+          });
+        }
       }
 
       function toggleDualPlay() {
